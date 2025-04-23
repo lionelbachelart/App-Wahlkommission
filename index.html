@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>BuVo-Wahl 2025 Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Vorstellungsformat 1 zur BuVo-Wahl 2025</h1>
+  </header>
+
+  <main class="main-layout">
+    <div class="section">
+      <div class="header-section">
+        <h2>Fragen</h2>
+        <button class="plus-button" onclick="toggleQuestionSection()">+</button>
+      </div>
+      <div id="questionInputSection" class="input-section">
+        <textarea id="questionInput" rows="6" placeholder="Eine Frage pro Zeile"></textarea><br>
+        <button onclick="addQuestions()">Fragen hinzufügen</button>
+      </div>
+      <div id="questionListSection" class="list-section">
+        <ul id="questionList"></ul>
+      </div>
+      <button id="spinQuestionButton" onclick="spinQuestion()">Frage ziehen</button>
+      <button id="nextQuestionButton" onclick="nextQuestion()" style="display: none;">Weiter</button>
+      <p id="questionResult"></p>
+    </div>
+
+    <div class="section" id="nameSection">
+      <div class="header-section">
+        <h2>Kandidierende</h2>
+        <button class="plus-button" onclick="toggleNameSection()">+</button>
+      </div>
+      <div id="nameInputSection" class="input-section" style="display: none">
+        <textarea id="nameInput" rows="6" placeholder="Ein Name pro Zeile"></textarea><br>
+        <button onclick="addNames()">Namen hinzufügen</button>
+      </div>
+      <div id="nameListSection" class="list-section">
+        <ul id="nameList"></ul>
+      </div>
+      <button id="spinNameButton" onclick="spinName()">Namen ziehen</button>
+      <p id="nameResult"></p>
+    </div>
+
+    <div class="section" id="timerSection">
+        <div class="header-section">
+          <h2>Redezeit</h2>
+          <button class="plus-button" onclick="toggleTimerSection()">+</button>
+        </div>
+        <div id="timerInputSection" class="input-section" style="display: none;">
+          <input type="text" id="timerName" placeholder="Name des Timers">
+          <input type="number" id="timerDuration" placeholder="Dauer in Minuten" min="1">
+          <button onclick="createTimer()">Timer hinzufügen</button>
+        </div>
+        <ul id="timerList"></ul>
+      </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

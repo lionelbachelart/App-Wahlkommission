@@ -1,0 +1,194 @@
+:root {
+  --volt-purple: #502379;
+  --volt-light-purple: #8661c1;
+  --volt-accent: #502379;
+  --volt-bg: #502379;
+  --volt-text: #222;
+  --volt-white: #ffffff;
+  --highlight-color: #8661c1; /* Highlight color for shuffle animation */
+}
+
+body {
+  font-family: 'Ubuntu', sans-serif;
+  background-color: var(--volt-bg);
+  color: var(--volt-text);
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: var(--volt-purple);
+  color: var(--volt-white);
+  padding: 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: 20px;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section {
+  background: var(--volt-white);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.plus-button {
+  background-color: var(--volt-accent);
+  color: var(--volt-white);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.plus-button:hover {
+  background-color: var(--volt-light-purple);
+}
+
+.input-section, .list-section {
+  margin-top: 20px;
+}
+
+.list-section {
+  display: block;
+  max-height: 300px; /* etwa 7 Elemente */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 5px;
+}
+
+button {
+  background-color: var(--volt-purple);
+  color: var(--volt-white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px; /* Abstand zwischen Shuffle-Button und Liste */
+}
+
+button:hover {
+  background-color: var(--volt-light-purple);
+}
+
+textarea, input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: 'Ubuntu', sans-serif;
+  box-sizing: border-box;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+li.not-selected {
+  background-color: var(--volt-white);
+  color: var(--volt-text);
+}
+
+li.selected {
+  background-color: var(--volt-accent);
+  color: var(--volt-white);
+}
+
+li.drawn {
+  background-color: var(--volt-white);
+  color: var(--volt-text);
+}
+
+.highlight {
+  background-color: var(--highlight-color) !important;
+}
+
+.progress-circle {
+  transition: stroke-dashoffset 1s linear;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+#timerList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#timerList li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--volt-purple);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+#timerList svg {
+  width: 30px;
+  height: 30px;
+  overflow: visible;
+}
+
+#timerList button {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
+#timerList span, #timerList strong {
+  font-size: 0.95rem;
+}
+
+#questionResult, #nameResult {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--volt-accent);
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  text-align: center;
+}
