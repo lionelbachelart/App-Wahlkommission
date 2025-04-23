@@ -4,27 +4,32 @@ let currentQuestionIndex = -1;
 let selectedNames = new Set(names);
 
 function addQuestions() {
-    const input = document.getElementById("questionInput").value;
-    const newQuestions = input.split("\n").map(q => q.trim()).filter(q => q.length > 0);
-    questions = questions.concat(newQuestions);
-    displayQuestions();
-    alert(`${newQuestions.length} Fragen hinzugefügt.`);
-    document.getElementById('questionInputSection').style.display = 'none';
-    document.getElementById('questionInput').value = '';
-  }  
+    setTimeout(() => {
+      const input = document.getElementById("questionInput").value;
+      const newQuestions = input.split("\n").map(q => q.trim()).filter(q => q.length > 0);
+      questions = questions.concat(newQuestions);
+      displayQuestions();
+      alert(`${newQuestions.length} Fragen hinzugefügt.`);
+      document.getElementById('questionInputSection').style.display = 'none';
+      document.getElementById('questionInput').value = '';
+    }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
+  }
+    
 
-function addNames() {
-  const input = document.getElementById("nameInput").value;
-  const newNames = input.split("\n").map(n => n.trim()).filter(n => n.length > 0);
-  names = names.concat(newNames);
-  displayNames();
-  selectedNames = new Set(names); // richtig initialisieren
-  alert(`${newNames.length} Namen hinzugefügt.`);
-  document.getElementById('nameInputSection').style.display = 'none';
-  document.getElementById('nameInput').value = '';
-
-  newNames.forEach(name => createTimer(name, 10));
-}
+  function addNames() {
+    setTimeout(() => {
+      const input = document.getElementById("nameInput").value;
+      const newNames = input.split("\n").map(n => n.trim()).filter(n => n.length > 0);
+      names = names.concat(newNames);
+      displayNames();
+      selectedNames = new Set(names); // richtig initialisieren
+      alert(`${newNames.length} Namen hinzugefügt.`);
+      document.getElementById('nameInputSection').style.display = 'none';
+      document.getElementById('nameInput').value = '';
+  
+      newNames.forEach(name => createTimer(name, 10));
+    }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
+  } 
 
 function displayQuestions() {
   const questionList = document.getElementById("questionList");
