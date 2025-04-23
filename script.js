@@ -104,7 +104,6 @@ function nextQuestion() {
     document.getElementById("questionResult").textContent = '';
     document.getElementById("nextQuestionButton").style.display = 'none';
     currentQuestionIndex = -1;
-
     document.querySelectorAll('#nameList li').forEach(li => {
       li.classList.remove('drawn');
       li.classList.add('selected');
