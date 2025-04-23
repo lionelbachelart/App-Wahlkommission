@@ -102,6 +102,7 @@ function nextQuestion() {
     questions.splice(currentQuestionIndex, 1);
     displayQuestions();
     document.getElementById("questionResult").textContent = '';
+    document.getElementById("nameResult").textContent = "";
     document.getElementById("nextQuestionButton").style.display = 'none';
     currentQuestionIndex = -1;
     document.querySelectorAll('#nameList li').forEach(li => {

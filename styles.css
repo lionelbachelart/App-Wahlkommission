@@ -93,7 +93,7 @@ header h1 {
 
 .list-section {
   display: block;
-  max-height: 380px; /* etwa 7 Elemente */
+  height: 380px; /* etwa 7 Elemente */
   overflow-y: auto;
   border: 1px solid #ddd;
   border-radius: 6px;
