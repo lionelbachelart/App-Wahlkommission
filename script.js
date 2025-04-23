@@ -9,7 +9,6 @@ function addQuestions() {
       const newQuestions = input.split("\n").map(q => q.trim()).filter(q => q.length > 0);
       questions = questions.concat(newQuestions);
       displayQuestions();
-      alert(`${newQuestions.length} Fragen hinzugefügt.`);
       document.getElementById('questionInputSection').style.display = 'none';
       document.getElementById('questionInput').value = '';
     }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
@@ -23,7 +22,6 @@ function addQuestions() {
       names = names.concat(newNames);
       displayNames();
       selectedNames = new Set(names); // richtig initialisieren
-      alert(`${newNames.length} Namen hinzugefügt.`);
       document.getElementById('nameInputSection').style.display = 'none';
       document.getElementById('nameInput').value = '';
   
