@@ -65,6 +65,7 @@ header h1 {
 
 .header-section {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
@@ -92,7 +93,7 @@ header h1 {
 
 .list-section {
   display: block;
-  max-height: 300px; /* etwa 7 Elemente */
+  max-height: 380px; /* etwa 7 Elemente */
   overflow-y: auto;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -108,7 +109,8 @@ button {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-top: 20px; /* Abstand zwischen Shuffle-Button und Liste */
+  margin-top: 10px; /* Abstand zwischen Shuffle-Button und Liste */
+  margin-bottom: 10px;
 }
 
 button:hover {
@@ -180,12 +182,12 @@ li:hover {
 #timerList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
 #timerList li {
   display: flex;
   align-items: center;
+  vertical-align: middle;
   gap: 10px;
   background-color: var(--volt-purple);
   color: white;
