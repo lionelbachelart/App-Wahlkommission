@@ -5,7 +5,10 @@ document.addEventListener("DOMContentLoaded", () => {
       createTimer();
     }
   });
+  const title = sessionStorage.getItem('customTitle');
+  if (title) document.querySelector("header h1").textContent = title;
 });
+
 
 let questions = [];
 let names = [];
@@ -13,87 +16,87 @@ let currentQuestionIndex = -1;
 let selectedNames = new Set(names);
 
 function addQuestions() {
+  updateSessionStorage(); // ← DAS HAT GEFELHT
+  setTimeout(() => {
+    const input = document.getElementById("questionInput").value;
+    const newQuestions = input.split("\n").map(q => q.trim()).filter(q => q.length > 0);
+    questions = questions.concat(newQuestions);
     updateSessionStorage(); // ← DAS HAT GEFELHT
-    setTimeout(() => {
-      const input = document.getElementById("questionInput").value;
-      const newQuestions = input.split("\n").map(q => q.trim()).filter(q => q.length > 0);
-      questions = questions.concat(newQuestions);
-      updateSessionStorage(); // ← DAS HAT GEFELHT
-      displayQuestions();
-      document.getElementById('questionInputSection').style.display = 'none';
-      document.getElementById('questionInput').value = '';
-    }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
-  }
-    
+    displayQuestions();
+    document.getElementById('questionInputSection').style.display = 'none';
+    document.getElementById('questionInput').value = '';
+  }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
+}
 
-  function addNames() {
-    setTimeout(() => {
-      const input = document.getElementById("nameInput").value;
-      const newNames = input.split("\n").map(n => n.trim()).filter(n => n.length > 0);
-      names = names.concat(newNames);
+
+function addNames() {
+  setTimeout(() => {
+    const input = document.getElementById("nameInput").value;
+    const newNames = input.split("\n").map(n => n.trim()).filter(n => n.length > 0);
+    names = names.concat(newNames);
+    updateSessionStorage();
+    displayNames();
+    selectedNames = new Set(names); // richtig initialisieren
+    document.getElementById('nameInputSection').style.display = 'none';
+    document.getElementById('nameInput').value = '';
+    newNames.forEach(name => createTimer(name, 10));
+  }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
+}
+
+function displayQuestions() {
+  const questionList = document.getElementById("questionList");
+  questionList.innerHTML = '';
+  questions.forEach((question, index) => {
+    const li = document.createElement('li');
+    const text = document.createElement('span');
+    text.textContent = question;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.innerHTML = '✖'; // kleines "x"
+    deleteBtn.className = 'inline-delete';
+    deleteBtn.onclick = () => {
+      questions.splice(index, 1);
+      updateSessionStorage();
+      displayQuestions();
+    };
+
+    li.appendChild(text);
+    li.appendChild(deleteBtn);
+    li.classList.add('selected');
+    questionList.appendChild(li);
+  });
+}
+
+
+
+function displayNames() {
+  const nameList = document.getElementById("nameList");
+  nameList.innerHTML = '';
+  names.forEach((name, index) => {
+    const li = document.createElement('li');
+    const text = document.createElement('span');
+    text.textContent = name;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.innerHTML = '✖';
+    deleteBtn.className = 'inline-delete';
+    deleteBtn.onclick = () => {
+      names.splice(index, 1);
+      selectedNames.delete(name);
       updateSessionStorage();
       displayNames();
-      selectedNames = new Set(names); // richtig initialisieren
-      document.getElementById('nameInputSection').style.display = 'none';
-      document.getElementById('nameInput').value = '';
-      newNames.forEach(name => createTimer(name, 10));
-    }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
-  } 
+    };
 
-  function displayQuestions() {
-    const questionList = document.getElementById("questionList");
-    questionList.innerHTML = '';
-    questions.forEach((question, index) => {
-      const li = document.createElement('li');
-      const text = document.createElement('span');
-      text.textContent = question;
-  
-      const deleteBtn = document.createElement('button');
-      deleteBtn.innerHTML = '✖'; // kleines "x"
-      deleteBtn.className = 'inline-delete';
-      deleteBtn.onclick = () => {
-        questions.splice(index, 1);
-        updateSessionStorage();
-        displayQuestions();
-      };
-  
-      li.appendChild(text);
-      li.appendChild(deleteBtn);
-      li.classList.add('selected');
-      questionList.appendChild(li);
-    });
-  }
-  
-  
+    li.appendChild(text);
+    li.appendChild(deleteBtn);
+    li.classList.add('selected');
+    li.onclick = (e) => {
+      if (e.target !== deleteBtn) toggleNameSelection(li, name);
+    };
+    nameList.appendChild(li);
+  });
+}
 
-  function displayNames() {
-    const nameList = document.getElementById("nameList");
-    nameList.innerHTML = '';
-    names.forEach((name, index) => {
-      const li = document.createElement('li');
-      const text = document.createElement('span');
-      text.textContent = name;
-  
-      const deleteBtn = document.createElement('button');
-      deleteBtn.innerHTML = '✖';
-      deleteBtn.className = 'inline-delete';
-      deleteBtn.onclick = () => {
-        names.splice(index, 1);
-        selectedNames.delete(name);
-        updateSessionStorage();
-        displayNames();
-      };
-  
-      li.appendChild(text);
-      li.appendChild(deleteBtn);
-      li.classList.add('selected');
-      li.onclick = (e) => {
-        if (e.target !== deleteBtn) toggleNameSelection(li, name);
-      };
-      nameList.appendChild(li);
-    });
-  }
-  
 
 function toggleNameSelection(li, name) {
   if (li.classList.contains('not-selected')) {
@@ -114,32 +117,32 @@ function getRandomAndRemove(arr) {
 }
 
 function animateHighlight(listId, arr, callback) {
-    let count = 0;
-    const interval = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * arr.length);
+  let count = 0;
+  const interval = setInterval(() => {
+    const randomIndex = Math.floor(Math.random() * arr.length);
+    document.querySelectorAll(`#${listId} li`).forEach(li => li.classList.remove('highlight'));
+    document.querySelectorAll(`#${listId} li`)[randomIndex].classList.add('highlight');
+    count++;
+    if (count > 15) {
+      clearInterval(interval);
       document.querySelectorAll(`#${listId} li`).forEach(li => li.classList.remove('highlight'));
-      document.querySelectorAll(`#${listId} li`)[randomIndex].classList.add('highlight');
-      count++;
-      if (count > 15) {
-        clearInterval(interval);
-        document.querySelectorAll(`#${listId} li`).forEach(li => li.classList.remove('highlight'));
-        callback(randomIndex);
-      }
-    }, 100);
-  }
-  
+      callback(randomIndex);
+    }
+  }, 100);
+}
 
-  function spinQuestion() {
-    if (questions.length === 0) return alert("Keine Fragen geladen.");
-    animateHighlight('questionList', questions, index => {
-      currentQuestionIndex = index;
-      const result = questions[index];
-      document.getElementById("questionResult").textContent = result;
-      document.getElementById("nextQuestionButton").style.display = 'inline-block';
-      document.getElementById("spinQuestionButton").style.display = 'none';
-    });
-  }
-  
+
+function spinQuestion() {
+  if (questions.length === 0) return alert("Keine Fragen geladen.");
+  animateHighlight('questionList', questions, index => {
+    currentQuestionIndex = index;
+    const result = questions[index];
+    document.getElementById("questionResult").textContent = result;
+    document.getElementById("nextQuestionButton").style.display = 'inline-block';
+    document.getElementById("spinQuestionButton").style.display = 'none';
+  });
+}
+
 
 function nextQuestion() {
   if (currentQuestionIndex !== -1) {
@@ -159,22 +162,22 @@ function nextQuestion() {
 }
 
 function spinName() {
-    if (selectedNames.size === 0) return alert("Keine Namen ausgewählt.");
-    const selectedNamesArray = Array.from(selectedNames);
-    animateHighlight('nameList', selectedNamesArray, index => {
-      const result = selectedNamesArray[index];
-      document.getElementById("nameResult").textContent = result;
-  
-      document.querySelectorAll('#nameList li.selected').forEach(li => {
-        if (li.textContent === result) {
-          li.classList.remove('selected');
-          li.classList.add('drawn');
-        }
-      });
-      selectedNames.delete(result);
+  if (selectedNames.size === 0) return alert("Keine Namen ausgewählt.");
+  const selectedNamesArray = Array.from(selectedNames);
+  animateHighlight('nameList', selectedNamesArray, index => {
+    const result = selectedNamesArray[index];
+    document.getElementById("nameResult").textContent = result;
+
+    document.querySelectorAll('#nameList li.selected').forEach(li => {
+      if (li.textContent === result) {
+        li.classList.remove('selected');
+        li.classList.add('drawn');
+      }
     });
-  }
-  
+    selectedNames.delete(result);
+  });
+}
+
 
 function toggleTimerSection() {
   const timerSection = document.getElementById('timerInputSection');
@@ -192,137 +195,137 @@ function toggleQuestionSection() {
 }
 
 function createTimer(nameArg = null, minutesArg = null) {
-    const name = nameArg !== null ? nameArg : document.getElementById("timerName").value;
-    const minutes = minutesArg !== null ? minutesArg : parseFloat(document.getElementById("timerDuration").value);
-    const list = document.getElementById("timerList");
-  
-    if (!name || isNaN(minutes) || minutes <= 0) {
-      alert("Bitte Name und Zeit angeben!");
-      return;
-    }
-  
-    const duration = Math.round(minutes * 60);
-    let remaining = duration;
-  
-    const li = document.createElement("li");
-    const label = document.createElement("span");
-    const timeDisplay = document.createElement("span");
-    const statusDisplay = document.createElement("strong");
-    const toggleBtn = document.createElement("button");
-    const deleteBtn = document.createElement("button");
-    const { svg, circle, circumference } = createTimerSVG();
-  
-    label.textContent = `${name}: `;
+  const defaultMinutes = parseInt(sessionStorage.getItem('defaultTime')) || 10;
+  const minutes = minutesArg !== null ? minutesArg : defaultMinutes;
+  const name = nameArg !== null ? nameArg : document.getElementById("timerName").value;
+  const list = document.getElementById("timerList");
+
+  if (!name || isNaN(minutes) || minutes <= 0) {
+    alert("Bitte Name und Zeit angeben!");
+    return;
+  }
+
+  const duration = Math.round(minutes * 60);
+  let remaining = duration;
+
+  const li = document.createElement("li");
+  const label = document.createElement("span");
+  const timeDisplay = document.createElement("span");
+  const statusDisplay = document.createElement("strong");
+  const toggleBtn = document.createElement("button");
+  const deleteBtn = document.createElement("button");
+  const { svg, circle, circumference } = createTimerSVG();
+
+  label.textContent = `${name}: `;
+  timeDisplay.textContent = formatTime(remaining);
+  statusDisplay.textContent = "⏸️ Pausiert";
+  toggleBtn.textContent = "▶️ Start";
+  deleteBtn.textContent = "❌";
+
+  li.appendChild(svg);
+  li.appendChild(label);
+  li.appendChild(timeDisplay);
+  li.appendChild(document.createTextNode(" – "));
+  li.appendChild(statusDisplay);
+  li.appendChild(document.createTextNode(" "));
+  li.appendChild(toggleBtn);
+  li.appendChild(deleteBtn);
+  list.appendChild(li);
+
+  let intervalId = null;
+  let active = false;
+
+  function formatTime(secs) {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function updateDisplay() {
     timeDisplay.textContent = formatTime(remaining);
-    statusDisplay.textContent = "⏸️ Pausiert";
-    toggleBtn.textContent = "▶️ Start";
-    deleteBtn.textContent = "❌";
-  
-    li.appendChild(svg);
-    li.appendChild(label);
-    li.appendChild(timeDisplay);
-    li.appendChild(document.createTextNode(" – "));
-    li.appendChild(statusDisplay);
-    li.appendChild(document.createTextNode(" "));
-    li.appendChild(toggleBtn);
-    li.appendChild(deleteBtn);
-    list.appendChild(li);
-  
-    let intervalId = null;
-    let active = false;
-  
-    function formatTime(secs) {
-      const m = Math.floor(secs / 60);
-      const s = secs % 60;
-      return `${m}:${s.toString().padStart(2, '0')}`;
-    }
-  
-    function updateDisplay() {
-      timeDisplay.textContent = formatTime(remaining);
-      const progress = (remaining / duration) * circumference;
-      circle.setAttribute("stroke-dashoffset", progress);
-    }
-  
-    function tick() {
-      if (remaining > 0) {
-        remaining--;
-        updateDisplay();
-        if (remaining <= 0) {
-          clearInterval(intervalId);
-          active = false;
-          statusDisplay.textContent = "✅ Fertig!";
-          toggleBtn.disabled = true;
-          circle.setAttribute("stroke", "#f44336");
-        }
-      }
-    }
-  
-    toggleBtn.onclick = () => {
-      if (active) {
+    const progress = (remaining / duration) * circumference;
+    circle.setAttribute("stroke-dashoffset", progress);
+  }
+
+  function tick() {
+    if (remaining > 0) {
+      remaining--;
+      updateDisplay();
+      if (remaining <= 0) {
         clearInterval(intervalId);
         active = false;
-        statusDisplay.textContent = "⏸️ Pausiert";
-        toggleBtn.textContent = "▶️ Start";
-      } else {
-        intervalId = setInterval(tick, 1000);
-        active = true;
-        statusDisplay.textContent = "⏱️ Läuft";
-        toggleBtn.textContent = "⏸️ Pause";
+        statusDisplay.textContent = "✅ Fertig!";
+        toggleBtn.disabled = true;
+        circle.setAttribute("stroke", "#f44336");
       }
-    };
-  
-    deleteBtn.onclick = () => {
+    }
+  }
+
+  toggleBtn.onclick = () => {
+    if (active) {
       clearInterval(intervalId);
-      li.remove();
-    };
-  
-    updateDisplay();
-  }
-  
-  function createTimerSVG(radius = 10) {
-    const circumference = 2 * Math.PI * radius;
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", radius * 2 + 10);
-    svg.setAttribute("height", radius * 2 + 10);
-  
-    const circleBg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circleBg.setAttribute("cx", radius + 5);
-    circleBg.setAttribute("cy", radius + 5);
-    circleBg.setAttribute("r", radius);
-    circleBg.setAttribute("stroke", "#ffffff33");
-    circleBg.setAttribute("stroke-width", "5");
-    circleBg.setAttribute("fill", "none");
-  
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.setAttribute("cx", radius + 5);
-    circle.setAttribute("cy", radius + 5);
-    circle.setAttribute("r", radius);
+      active = false;
+      statusDisplay.textContent = "⏸️ Pausiert";
+      toggleBtn.textContent = "▶️ Start";
+    } else {
+      intervalId = setInterval(tick, 1000);
+      active = true;
+      statusDisplay.textContent = "⏱️ Läuft";
+      toggleBtn.textContent = "⏸️ Pause";
+    }
+  };
 
-    const inQuickRound = document.getElementById("quickRoundView").style.display === "block";
-    circle.setAttribute("stroke", inQuickRound ? "#502379" : "#ffffff");
-    circle.setAttribute("stroke-width", "5");
-    circle.setAttribute("fill", "none");
-    circle.setAttribute("stroke-dasharray", circumference);
-    circle.setAttribute("stroke-dashoffset", circumference);
-    circle.classList.add("progress-circle");
-  
-    svg.appendChild(circleBg);
-    svg.appendChild(circle);
-    return { svg, circle, circumference };
-  }
-  
-  function showMainView() {
-    document.getElementById('mainView').style.display = 'block';
-    document.getElementById('quickRoundView').style.display = 'none';
-  }
-  
-  function showQuickRound() {
-    document.getElementById('mainView').style.display = 'none';
-    document.getElementById('quickRoundView').style.display = 'block';
-  }
-  
+  deleteBtn.onclick = () => {
+    clearInterval(intervalId);
+    li.remove();
+  };
 
+  updateDisplay();
+}
 
+function createTimerSVG(radius = 10) {
+  const circumference = 2 * Math.PI * radius;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", radius * 2 + 10);
+  svg.setAttribute("height", radius * 2 + 10);
+
+  const circleBg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  circleBg.setAttribute("cx", radius + 5);
+  circleBg.setAttribute("cy", radius + 5);
+  circleBg.setAttribute("r", radius);
+  circleBg.setAttribute("fill", "none");
+
+  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  circle.setAttribute("cx", radius + 5);
+  circle.setAttribute("cy", radius + 5);
+  circle.setAttribute("r", radius);
+
+  const inQuickRound = document.getElementById("quickRoundView").style.display === "block";
+  circleBg.setAttribute("stroke", inQuickRound ? "#50237933" : "#ffffff33");
+  circle.setAttribute("stroke", inQuickRound ? "#502379" : "#ffffff");
+  circleBg.setAttribute("stroke-width", inQuickRound ? "10" : "5");
+  circle.setAttribute("stroke-width", inQuickRound ? "10" : "5");
+  circle.setAttribute("fill", "none");
+  circle.setAttribute("stroke-dasharray", circumference);
+  circle.setAttribute("stroke-dashoffset", circumference);
+  circle.classList.add("progress-circle");
+
+  svg.appendChild(circleBg);
+  svg.appendChild(circle);
+  return { svg, circle, circumference };
+}
+
+function showMainView() {
+  document.getElementById('mainView').style.display = 'block';
+  document.getElementById('quickRoundView').style.display = 'none';
+  document.getElementById('settingsView').style.display = 'none';
+}
+
+function showSettings() {
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('quickRoundView').style.display = 'none';
+  document.getElementById('settingsView').style.display = 'block';
+}
 
 let quickNames = [];
 let quickIndex = -1;
@@ -338,6 +341,7 @@ function shuffle(array) {
 function showQuickRound() {
   document.getElementById('mainView').style.display = 'none';
   document.getElementById('quickRoundView').style.display = 'block';
+  document.getElementById('settingsView').style.display = 'none';
   quickNames = shuffle([...names]);
   quickIndex = -1;
   document.getElementById('quickRoundName').textContent = '';
@@ -346,6 +350,7 @@ function showQuickRound() {
 }
 
 function startQuickRound() {
+  quickRemaining = parseInt(sessionStorage.getItem('quickTime')) || 60;
   if (quickIndex === -1 || quickIndex >= quickNames.length) {
     alert("Bitte zuerst auf 'Nächster' klicken.");
     return;
@@ -429,3 +434,36 @@ function clearNames() {
     displayNames();
   }
 }
+
+function saveSettings() {
+  const title = document.getElementById("settingsTitle").value.trim();
+  const defaultTime = parseInt(document.getElementById("settingsDefaultTime").value, 10);
+  const quickTime = parseInt(document.getElementById("settingsQuickTime").value, 10);
+
+  if (title) {
+    sessionStorage.setItem('customTitle', title);
+    document.querySelector("header h1").textContent = title;
+  }
+  if (!isNaN(defaultTime)) sessionStorage.setItem('defaultTime', defaultTime);
+  if (!isNaN(quickTime)) sessionStorage.setItem('quickTime', quickTime);
+
+  alert("Einstellungen gespeichert!");
+}
+
+
+// Beim Laden:
+document.addEventListener("DOMContentLoaded", () => {
+  const title = sessionStorage.getItem('customTitle');
+  const defaultTime = sessionStorage.getItem('defaultTime');
+  const quickTime = sessionStorage.getItem('quickTime');
+
+  if (title) document.querySelector("header h1").textContent = title;
+  if (defaultTime) document.getElementById("settingsDefaultTime").value = defaultTime;
+  if (quickTime) document.getElementById("settingsQuickTime").value = quickTime;
+});
+
+// Anpassung im createTimer():
+const defaultMinutes = parseInt(sessionStorage.getItem('defaultTime')) || 10;
+// und beim Schnelldurchlauf: 
+quickRemaining = parseInt(sessionStorage.getItem('quickTime')) || 60;
+

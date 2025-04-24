@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
   <meta charset="UTF-8">
   <title>BuVo-Wahl 2025 Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <header>
     <h1>Vorstellungsformat 1 zur BuVo-Wahl 2025</h1>
   </header>
   <nav style="text-align: center; margin: 20px 0;">
-    <button onclick="showMainView()" style="background-color: var(--volt-light-purple); margin-right: 10px;">Fragen & Antworten</button>
-    <button onclick="showQuickRound()" style="background-color: var(--volt-light-purple); margin-left: 10px;">Schnelle Runde</button>
+    <button onclick="showMainView()" style="background-color: var(--volt-light-purple); margin-right: 10px;">Fragen &
+      Antworten</button>
+    <button onclick="showQuickRound()"
+      style="background-color: var(--volt-light-purple); margin-left: 10px; margin-right: 10px;">Schnelle Runde</button>
+    <button onclick="showSettings()" style="background-color: var(--volt-light-purple); margin-left: 10px;">⚙️
+      Einstellungen</button>
   </nav>
+
   <div id="mainView">
     <main class="main-layout">
       <div class="section">
@@ -34,7 +41,6 @@
         <button class="subtle-clear" onclick="clearQuestions()">🧹 Alle Fragen löschen</button>
       </div>
 
-
       <div class="section" id="nameSection">
         <div class="header-section">
           <h2>Kandidierende</h2>
@@ -53,34 +59,60 @@
       </div>
 
       <div class="section" id="timerSection">
-          <div class="header-section">
-            <h2>Redezeit</h2>
-            <button class="plus-button" onclick="toggleTimerSection()">+</button>
-          </div>
-          <div id="timerInputSection" class="input-section" style="display: none;">
-            <input type="text" id="timerName" placeholder="Name des Timers">
-            <input type="number" id="timerDuration" placeholder="Dauer in Minuten" min="1">
-            <button onclick="createTimer()">Timer hinzufügen</button>
-          </div>
-          <ul id="timerList"></ul>
+        <div class="header-section">
+          <h2>Redezeit</h2>
+          <button class="plus-button" onclick="toggleTimerSection()">+</button>
         </div>
+        <div id="timerInputSection" class="input-section" style="display: none;">
+          <input type="text" id="timerName" placeholder="Name des Timers">
+          <input type="number" id="timerDuration" placeholder="Dauer in Minuten" min="1">
+          <button onclick="createTimer()">Timer hinzufügen</button>
+        </div>
+        <ul id="timerList"></ul>
+      </div>
     </main>
   </div>
-  <div id="quickRoundView" style="display: none;">
-    <div class="section" style="max-width: 600px; margin: 40px auto; text-align: center;">
-      <h2>Schnelle Runde</h2>
-      <div id="quickRoundName" style="font-size: 2rem; margin: 20px 0;"></div>
-      <div id="quickTimerCircle" style="margin: 20px auto; width: 120px; height: 120px;"></div>
-      <div id="quickSecondsDisplay" style="font-size: 1.5rem; color: var(--volt-accent); margin-top: 10px;"></div>
-      <div style="margin-top: 20px;">
-        <button onclick="nextQuick()">Namen ziehen</button>
-        <button onclick="startQuickRound()">Start</button>
+
+  <div id="quickRoundView">
+    <main class="second-layout">
+      <div class="section">
+        <div class="header-section" style="text-align: center !important">
+          <h2>Schnelle Runde</h2>
+        </div>
+        <div>
+          <div id="quickRoundName" style="font-size: 2rem; margin: 20px 0;"></div>
+          <div id="quickTimerCircle" style="margin: 20px auto; width: 120px; height: 120px;"></div>
+          <div id="quickSecondsDisplay" style="font-size: 1.5rem; color: var(--volt-accent); margin-top: 10px;"></div>
+          <div style="margin-top: 20px;">
+            <button onclick="nextQuick()">Namen ziehen</button>
+            <button onclick="startQuickRound()">Start</button>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>  
+    </main>
+  </div>
+
+  <div id="settingsView">
+    <main class="second-layout">
+      <div class="section">
+        <div class="header-section">
+          <h2>Einstellungen</h2>
+        </div>
+        <div>
+          <label>Seitentitel: <input id="settingsTitle" type="text" placeholder="z. B. BuVo-Wahl 2025"></label><br>
+          <label>Standard-Redezeit (min): <input id="settingsDefaultTime" type="number" min="1"></label><br>
+          <label>Schnelldurchlauf-Zeit (sek): <input id="settingsQuickTime" type="number" min="10"></label><br>
+          <button onclick="saveSettings()">💾 Einstellungen speichern</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
   <script src="script.js"></script>
+
   <div>
     <p style="color: var(--volt-light-purple); margin-top: 25px; text-align: center; max-width: 100%;">Wahlkommission zum Bundesparteitag in Düssseldorf 2025</p>
   </div>
 </body>
+
 </html>

@@ -5,7 +5,8 @@
   --volt-bg: #502379;
   --volt-text: #222;
   --volt-white: #ffffff;
-  --highlight-color: #8661c1; /* Highlight color for shuffle animation */
+  --highlight-color: #8661c1;
+  /* Highlight color for shuffle animation */
 }
 
 body {
@@ -37,6 +38,15 @@ header h1 {
   padding: 20px;
   width: 100%;
   box-sizing: border-box;
+  text-align: center;
+}
+
+.second-layout {
+  display: block;
+  gap: 20px;
+  padding: 20px 20%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .section {
@@ -54,12 +64,14 @@ header h1 {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
 
-.section, .list-section {
+.section,
+.list-section {
   animation: fadeIn 0.5s ease-in-out;
 }
 
@@ -87,13 +99,15 @@ header h1 {
   background-color: var(--volt-light-purple);
 }
 
-.input-section, .list-section {
+.input-section,
+.list-section {
   margin-top: 20px;
 }
 
 .list-section {
   display: block;
-  height: 380px; /* etwa 7 Elemente */
+  height: 380px;
+  /* etwa 7 Elemente */
   overflow-y: auto;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -109,14 +123,16 @@ button {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-top: 10px; /* Abstand zwischen Shuffle-Button und Liste */
+  margin-top: 10px;
+  /* Abstand zwischen Shuffle-Button und Liste */
   margin-bottom: 10px;
 }
 
 .inline-delete {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.5); /* Weiß mit 50% */
+  color: rgba(255, 255, 255, 0.5);
+  /* Weiß mit 50% */
   font-size: 1rem;
   margin-left: 10px;
   cursor: pointer;
@@ -125,7 +141,8 @@ button {
 }
 
 .inline-delete:hover {
-  color: rgba(255, 255, 255, 0.9); /* heller bei Hover */
+  color: rgba(255, 255, 255, 0.9);
+  /* heller bei Hover */
 }
 
 
@@ -152,7 +169,8 @@ button:hover {
 }
 
 
-textarea, input {
+textarea,
+input {
   width: 100%;
   padding: 15px;
   margin: 10px 0;
@@ -162,7 +180,8 @@ textarea, input {
   box-sizing: border-box;
 }
 
-textarea::placeholder, input::placeholder {
+textarea::placeholder,
+input::placeholder {
   color: #aaa;
 }
 
@@ -241,11 +260,13 @@ li:hover {
   font-size: 0.85rem;
 }
 
-#timerList span, #timerList strong {
+#timerList span,
+#timerList strong {
   font-size: 0.95rem;
 }
 
-#questionResult, #nameResult {
+#questionResult,
+#nameResult {
   font-size: 1.4rem;
   font-weight: bold;
   color: var(--volt-accent);
