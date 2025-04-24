@@ -113,10 +113,44 @@ button {
   margin-bottom: 10px;
 }
 
+.inline-delete {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5); /* Weiß mit 50% */
+  font-size: 1rem;
+  margin-left: 10px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.inline-delete:hover {
+  color: rgba(255, 255, 255, 0.9); /* heller bei Hover */
+}
+
+
 button:hover {
   background-color: var(--volt-light-purple);
   transform: scale(1.05);
 }
+
+.subtle-clear {
+  background: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 10px 0;
+  padding: 4px 10px;
+  transition: color 0.3s;
+}
+
+.inline-delete:hover,
+.subtle-clear:hover {
+  background-color: transparent !important;
+  transform: none !important;
+}
+
 
 textarea, input {
   width: 100%;
@@ -220,4 +254,15 @@ li:hover {
   background-color: #f5f5f5;
   border-radius: 8px;
   text-align: center;
+}
+
+
+#quickRoundName {
+  font-weight: bold;
+  color: var(--volt-accent);
+}
+
+#quickTimerCircle svg {
+  display: block;
+  margin: auto;
 }

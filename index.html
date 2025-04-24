@@ -10,56 +10,74 @@
   <header>
     <h1>Vorstellungsformat 1 zur BuVo-Wahl 2025</h1>
   </header>
-
-  <main class="main-layout">
-    <div class="section">
-      <div class="header-section">
-        <h2>Fragen</h2>
-        <button class="plus-button" onclick="toggleQuestionSection()">+</button>
-      </div>
-      <div id="questionInputSection" class="input-section" style="display: none;">
-        <textarea id="questionInput" rows="6" placeholder="Eine Frage pro Zeile"></textarea><br>
-        <button onclick="addQuestions()">Fragen hinzufügen</button>
-      </div>
-      <div id="questionListSection" class="list-section">
-        <ul id="questionList"></ul>
-      </div>
-      <button id="spinQuestionButton" onclick="spinQuestion()">Frage ziehen</button>
-      <button id="nextQuestionButton" onclick="nextQuestion()" style="display: none;">Weiter</button>
-      <p id="questionResult"></p>
-    </div>
-
-
-    <div class="section" id="nameSection">
-      <div class="header-section">
-        <h2>Kandidierende</h2>
-        <button class="plus-button" onclick="toggleNameSection()">+</button>
-      </div>
-      <div id="nameInputSection" class="input-section" style="display: none">
-        <textarea id="nameInput" rows="6" placeholder="Ein Name pro Zeile"></textarea><br>
-        <button onclick="addNames()">Namen hinzufügen</button>
-      </div>
-      <div id="nameListSection" class="list-section">
-        <ul id="nameList"></ul>
-      </div>
-      <button id="spinNameButton" onclick="spinName()">Namen ziehen</button>
-      <p id="nameResult"></p>
-    </div>
-
-    <div class="section" id="timerSection">
+  <nav style="text-align: center; margin: 20px 0;">
+    <button onclick="showMainView()" style="background-color: var(--volt-light-purple); margin-right: 10px;">Fragen & Antworten</button>
+    <button onclick="showQuickRound()" style="background-color: var(--volt-light-purple); margin-left: 10px;">Schnelle Runde</button>
+  </nav>
+  <div id="mainView">
+    <main class="main-layout">
+      <div class="section">
         <div class="header-section">
-          <h2>Redezeit</h2>
-          <button class="plus-button" onclick="toggleTimerSection()">+</button>
+          <h2>Fragen</h2>
+          <button class="plus-button" onclick="toggleQuestionSection()">+</button>
         </div>
-        <div id="timerInputSection" class="input-section" style="display: none;">
-          <input type="text" id="timerName" placeholder="Name des Timers">
-          <input type="number" id="timerDuration" placeholder="Dauer in Minuten" min="1">
-          <button onclick="createTimer()">Timer hinzufügen</button>
+        <div id="questionInputSection" class="input-section" style="display: none;">
+          <textarea id="questionInput" rows="6" placeholder="Eine Frage pro Zeile"></textarea><br>
+          <button onclick="addQuestions()">Fragen hinzufügen</button>
         </div>
-        <ul id="timerList"></ul>
+        <div id="questionListSection" class="list-section">
+          <ul id="questionList"></ul>
+        </div>
+        <button id="spinQuestionButton" onclick="spinQuestion()">Frage ziehen</button>
+        <button id="nextQuestionButton" onclick="nextQuestion()" style="display: none;">Weiter</button>
+        <p id="questionResult"></p>
+        <button class="subtle-clear" onclick="clearQuestions()">🧹 Alle Fragen löschen</button>
       </div>
-  </main>
 
+
+      <div class="section" id="nameSection">
+        <div class="header-section">
+          <h2>Kandidierende</h2>
+          <button class="plus-button" onclick="toggleNameSection()">+</button>
+        </div>
+        <div id="nameInputSection" class="input-section" style="display: none">
+          <textarea id="nameInput" rows="6" placeholder="Ein Name pro Zeile"></textarea><br>
+          <button onclick="addNames()">Namen hinzufügen</button>
+        </div>
+        <div id="nameListSection" class="list-section">
+          <ul id="nameList"></ul>
+        </div>
+        <button id="spinNameButton" onclick="spinName()">Namen ziehen</button>
+        <p id="nameResult"></p>
+        <button class="subtle-clear" onclick="clearNames()">🧹 Alle Namen löschen</button>
+      </div>
+
+      <div class="section" id="timerSection">
+          <div class="header-section">
+            <h2>Redezeit</h2>
+            <button class="plus-button" onclick="toggleTimerSection()">+</button>
+          </div>
+          <div id="timerInputSection" class="input-section" style="display: none;">
+            <input type="text" id="timerName" placeholder="Name des Timers">
+            <input type="number" id="timerDuration" placeholder="Dauer in Minuten" min="1">
+            <button onclick="createTimer()">Timer hinzufügen</button>
+          </div>
+          <ul id="timerList"></ul>
+        </div>
+    </main>
+  </div>
+  <div id="quickRoundView" style="display: none;">
+    <div class="section" style="max-width: 600px; margin: 40px auto; text-align: center;">
+      <h2>Schnelle Runde</h2>
+      <div id="quickRoundName" style="font-size: 2rem; margin: 20px 0;"></div>
+      <div id="quickTimerCircle" style="margin: 20px auto; width: 120px; height: 120px;"></div>
+      <div id="quickSecondsDisplay" style="font-size: 1.5rem; color: var(--volt-accent); margin-top: 10px;"></div>
+      <div style="margin-top: 20px;">
+        <button onclick="nextQuick()">Namen ziehen</button>
+        <button onclick="startQuickRound()">Start</button>
+      </div>
+    </div>
+  </div>  
   <script src="script.js"></script>
   <div>
     <p style="color: var(--volt-light-purple); margin-top: 25px; text-align: center; max-width: 100%;">Wahlkommission zum Bundesparteitag in Düssseldorf 2025</p>

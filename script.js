@@ -1,13 +1,24 @@
+document.addEventListener("DOMContentLoaded", () => {
+  loadFromSession();
+  document.getElementById("timerDuration").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      createTimer();
+    }
+  });
+});
+
 let questions = [];
 let names = [];
 let currentQuestionIndex = -1;
 let selectedNames = new Set(names);
 
 function addQuestions() {
+    updateSessionStorage(); // ← DAS HAT GEFELHT
     setTimeout(() => {
       const input = document.getElementById("questionInput").value;
       const newQuestions = input.split("\n").map(q => q.trim()).filter(q => q.length > 0);
       questions = questions.concat(newQuestions);
+      updateSessionStorage(); // ← DAS HAT GEFELHT
       displayQuestions();
       document.getElementById('questionInputSection').style.display = 'none';
       document.getElementById('questionInput').value = '';
@@ -20,36 +31,69 @@ function addQuestions() {
       const input = document.getElementById("nameInput").value;
       const newNames = input.split("\n").map(n => n.trim()).filter(n => n.length > 0);
       names = names.concat(newNames);
+      updateSessionStorage();
       displayNames();
       selectedNames = new Set(names); // richtig initialisieren
       document.getElementById('nameInputSection').style.display = 'none';
       document.getElementById('nameInput').value = '';
-  
       newNames.forEach(name => createTimer(name, 10));
     }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
   } 
 
-function displayQuestions() {
-  const questionList = document.getElementById("questionList");
-  questionList.innerHTML = '';
-  questions.forEach(question => {
-    const li = document.createElement('li');
-    li.textContent = question;
-    questionList.appendChild(li);
-  });
-}
+  function displayQuestions() {
+    const questionList = document.getElementById("questionList");
+    questionList.innerHTML = '';
+    questions.forEach((question, index) => {
+      const li = document.createElement('li');
+      const text = document.createElement('span');
+      text.textContent = question;
+  
+      const deleteBtn = document.createElement('button');
+      deleteBtn.innerHTML = '✖'; // kleines "x"
+      deleteBtn.className = 'inline-delete';
+      deleteBtn.onclick = () => {
+        questions.splice(index, 1);
+        updateSessionStorage();
+        displayQuestions();
+      };
+  
+      li.appendChild(text);
+      li.appendChild(deleteBtn);
+      li.classList.add('selected');
+      questionList.appendChild(li);
+    });
+  }
+  
+  
 
-function displayNames() {
-  const nameList = document.getElementById("nameList");
-  nameList.innerHTML = '';
-  names.forEach(name => {
-    const li = document.createElement('li');
-    li.classList.add('selected');
-    li.textContent = name;
-    li.onclick = () => toggleNameSelection(li, name);
-    nameList.appendChild(li);
-  });
-}
+  function displayNames() {
+    const nameList = document.getElementById("nameList");
+    nameList.innerHTML = '';
+    names.forEach((name, index) => {
+      const li = document.createElement('li');
+      const text = document.createElement('span');
+      text.textContent = name;
+  
+      const deleteBtn = document.createElement('button');
+      deleteBtn.innerHTML = '✖';
+      deleteBtn.className = 'inline-delete';
+      deleteBtn.onclick = () => {
+        names.splice(index, 1);
+        selectedNames.delete(name);
+        updateSessionStorage();
+        displayNames();
+      };
+  
+      li.appendChild(text);
+      li.appendChild(deleteBtn);
+      li.classList.add('selected');
+      li.onclick = (e) => {
+        if (e.target !== deleteBtn) toggleNameSelection(li, name);
+      };
+      nameList.appendChild(li);
+    });
+  }
+  
 
 function toggleNameSelection(li, name) {
   if (li.classList.contains('not-selected')) {
@@ -253,7 +297,9 @@ function createTimer(nameArg = null, minutesArg = null) {
     circle.setAttribute("cx", radius + 5);
     circle.setAttribute("cy", radius + 5);
     circle.setAttribute("r", radius);
-    circle.setAttribute("stroke", "#ffffff");
+
+    const inQuickRound = document.getElementById("quickRoundView").style.display === "block";
+    circle.setAttribute("stroke", inQuickRound ? "#502379" : "#ffffff");
     circle.setAttribute("stroke-width", "5");
     circle.setAttribute("fill", "none");
     circle.setAttribute("stroke-dasharray", circumference);
@@ -265,11 +311,121 @@ function createTimer(nameArg = null, minutesArg = null) {
     return { svg, circle, circumference };
   }
   
+  function showMainView() {
+    document.getElementById('mainView').style.display = 'block';
+    document.getElementById('quickRoundView').style.display = 'none';
+  }
+  
+  function showQuickRound() {
+    document.getElementById('mainView').style.display = 'none';
+    document.getElementById('quickRoundView').style.display = 'block';
+  }
+  
 
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("timerDuration").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      createTimer();
+
+
+let quickNames = [];
+let quickIndex = -1;
+let quickInterval = null;
+let quickRemaining = 60;
+let quickCircle = null;
+let quickCircumference = null;
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function showQuickRound() {
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('quickRoundView').style.display = 'block';
+  quickNames = shuffle([...names]);
+  quickIndex = -1;
+  document.getElementById('quickRoundName').textContent = '';
+  document.getElementById('quickTimerCircle').innerHTML = '';
+  document.getElementById('quickSecondsDisplay').textContent = '';
+}
+
+function startQuickRound() {
+  if (quickIndex === -1 || quickIndex >= quickNames.length) {
+    alert("Bitte zuerst auf 'Nächster' klicken.");
+    return;
+  }
+  quickRemaining = 60;
+  const { svg, circle, circumference } = createTimerSVG(50);
+  quickCircle = circle;
+  quickCircumference = circumference;
+
+  document.getElementById('quickTimerCircle').innerHTML = '';
+  document.getElementById('quickTimerCircle').appendChild(svg);
+  updateQuickDisplay();
+
+  clearInterval(quickInterval);
+  quickInterval = setInterval(() => {
+    quickRemaining--;
+    updateQuickDisplay();
+
+    if (quickRemaining <= 0) {
+      clearInterval(quickInterval);
+      quickCircle.setAttribute("stroke", "#f44336"); // rot bei Ende
     }
-  });
-});
+  }, 1000);
+}
+
+function updateQuickDisplay() {
+  const progress = (quickRemaining / 60) * quickCircumference;
+  quickCircle.setAttribute("stroke-dashoffset", progress);
+  document.getElementById('quickSecondsDisplay').textContent = `${quickRemaining}s`;
+}
+
+function nextQuick() {
+  clearInterval(quickInterval);
+  quickInterval = null;
+
+  if (quickIndex + 1 >= quickNames.length) {
+    alert("Schnelldurchlauf abgeschlossen!");
+    return;
+  }
+
+  quickIndex++;
+  document.getElementById('quickRoundName').textContent = quickNames[quickIndex];
+  document.getElementById('quickTimerCircle').innerHTML = '';
+  document.getElementById('quickSecondsDisplay').textContent = '';
+}
+
+function updateSessionStorage() {
+  sessionStorage.setItem('questions', JSON.stringify(questions));
+  sessionStorage.setItem('names', JSON.stringify(names));
+}
+
+function loadFromSession() {
+  const storedQuestions = JSON.parse(sessionStorage.getItem('questions'));
+  const storedNames = JSON.parse(sessionStorage.getItem('names'));
+
+  if (storedQuestions) questions = storedQuestions;
+  if (storedNames) {
+    names = storedNames;
+    storedNames.forEach(name => createTimer(name, 10));
+    selectedNames = new Set(names);
+  }
+
+  displayQuestions();
+  displayNames();
+}
+
+
+function clearQuestions() {
+  if (confirm("Alle Fragen wirklich löschen?")) {
+    questions = [];
+    updateSessionStorage();
+    displayQuestions();
+  }
+}
+
+function clearNames() {
+  if (confirm("Alle Namen wirklich löschen?")) {
+    names = [];
+    selectedNames.clear();
+    updateSessionStorage();
+    displayNames();
+  }
+}
