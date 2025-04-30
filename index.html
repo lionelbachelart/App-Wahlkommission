@@ -6,19 +6,20 @@
   <title>BuVo-Wahl 2025 Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
   <header>
     <h1>Vorstellungsformat 1 zur BuVo-Wahl 2025</h1>
   </header>
-  <nav style="text-align: center; margin: 20px 0;">
-    <button onclick="showMainView()" style="background-color: var(--volt-light-purple); margin-right: 10px;">Fragen &
-      Antworten</button>
-    <button onclick="showQuickRound()"
-      style="background-color: var(--volt-light-purple); margin-left: 10px; margin-right: 10px;">Schnelle Runde</button>
-    <button onclick="showSettings()" style="background-color: var(--volt-light-purple); margin-left: 10px;">⚙️
-      Einstellungen</button>
+
+  <nav class="main-nav">
+    <button onclick="showMainView()" aria-label="Fragen & Antworten"><i class="fas fa-pen"></i> Fragen</button>
+    <button onclick="showQuickRound()" aria-label="Schnelle Runde"><i class="fas fa-bolt"></i> Schnell</button>
+    <button onclick="showDebateView()" aria-label="Diskussion"><i class="fas fa-comments"></i> Debatte</button>
+    <button onclick="showSettings()" aria-label="Einstellungen"><i class="fas fa-cog"></i></button>
+    <!--<button onclick="toggleDarkMode()" aria-label="Dark Mode" id="darkModeBtn"><i class="fas fa-moon"></i></button>-->    
   </nav>
 
   <div id="mainView">
@@ -26,93 +27,113 @@
       <div class="section">
         <div class="header-section">
           <h2>Fragen</h2>
-          <button class="plus-button" onclick="toggleQuestionSection()">+</button>
+          <button class="plus-button" onclick="toggleSection('questionInputSection')"><i class="fas fa-plus"></i></button>
         </div>
-        <div id="questionInputSection" class="input-section" style="display: none;">
+        <div id="questionInputSection" class="input-section">
           <textarea id="questionInput" rows="6" placeholder="Eine Frage pro Zeile"></textarea><br>
-          <button onclick="addQuestions()">Fragen hinzufügen</button>
+          <button onclick="addQuestions()"><i class="fas fa-plus-circle"></i> Fragen hinzufügen</button>
         </div>
         <div id="questionListSection" class="list-section">
           <ul id="questionList"></ul>
         </div>
-        <button id="spinQuestionButton" onclick="spinQuestion()">Frage ziehen</button>
-        <button id="nextQuestionButton" onclick="nextQuestion()" style="display: none;">Weiter</button>
+        <button id="spinQuestionButton" onclick="spinQuestion()"><i class="fas fa-random"></i> Frage ziehen</button>
+        <button id="nextQuestionButton" onclick="nextQuestion()" style="display: none;"><i class="fas fa-forward"></i> Weiter</button>
         <p id="questionResult"></p>
-        <button class="subtle-clear" onclick="clearQuestions()">🧹 Alle Fragen löschen</button>
+        <button class="icon-delete" onclick="clearQuestions()"><i class="fas fa-trash"></i> Alle Fragen löschen</button>
       </div>
 
       <div class="section" id="nameSection">
         <div class="header-section">
           <h2>Kandidierende</h2>
-          <button class="plus-button" onclick="toggleNameSection()">+</button>
+          <button class="plus-button" onclick="toggleSection('nameInputSection')"><i class="fas fa-plus"></i></button>
         </div>
-        <div id="nameInputSection" class="input-section" style="display: none">
+        <div id="nameInputSection" class="input-section">
           <textarea id="nameInput" rows="6" placeholder="Ein Name pro Zeile"></textarea><br>
-          <button onclick="addNames()">Namen hinzufügen</button>
+          <button onclick="addNames()"><i class="fas fa-plus-circle"></i> Namen hinzufügen</button>
         </div>
         <div id="nameListSection" class="list-section">
           <ul id="nameList"></ul>
         </div>
-        <button id="spinNameButton" onclick="spinName()">Namen ziehen</button>
+        <button id="spinNameButton" onclick="spinName()"><i class="fas fa-random"></i> Namen ziehen</button>
         <p id="nameResult"></p>
-        <button class="subtle-clear" onclick="clearNames()">🧹 Alle Namen löschen</button>
+        <button class="icon-delete" onclick="clearNames()"><i class="fas fa-trash"></i> Alle Namen löschen</button>
       </div>
 
       <div class="section" id="timerSection">
         <div class="header-section">
           <h2>Redezeit</h2>
-          <button class="plus-button" onclick="toggleTimerSection()">+</button>
+          <button class="plus-button" onclick="toggleSection('timerInputSection')"><i class="fas fa-plus"></i></button>
         </div>
-        <div id="timerInputSection" class="input-section" style="display: none;">
+        <div id="timerInputSection" class="input-section">
           <input type="text" id="timerName" placeholder="Name des Timers">
           <input type="number" id="timerDuration" placeholder="Dauer in Minuten" min="1">
-          <button onclick="createTimer()">Timer hinzufügen</button>
+          <button onclick="createTimer()"><i class="fas fa-hourglass-start"></i> Timer hinzufügen</button>
         </div>
         <ul id="timerList"></ul>
+        <button onclick="clearAllTimers()" class="icon-delete"><i class="fas fa-trash"></i> Alle Timer löschen</button>
       </div>
     </main>
   </div>
 
-  <div id="quickRoundView">
+  <div id="quickRoundView" style="display: none;">
     <main class="second-layout">
       <div class="section">
         <div class="header-section" style="text-align: center !important">
           <h2>Schnelle Runde</h2>
         </div>
         <div>
-          <div id="quickRoundName" style="font-size: 2rem; margin: 20px 0;"></div>
-          <div id="quickTimerCircle" style="margin: 20px auto; width: 120px; height: 120px;"></div>
+          <div id="quickRoundName" style="font-size: 2rem; margin: 20px 0;" class="result-box"></div>
+          <div id="quickTimerCircle" class="circle-holder" style="margin: 20px auto; width: 120px; height: 120px;"></div>
           <div id="quickSecondsDisplay" style="font-size: 1.5rem; color: var(--volt-accent); margin-top: 10px;"></div>
           <div style="margin-top: 20px;">
-            <button onclick="nextQuick()">Namen ziehen</button>
-            <button onclick="startQuickRound()">Start</button>
+            <button onclick="nextQuick()"><i class="fas fa-random"></i> Namen ziehen</button>
+            <button onclick="startQuickRound()"><i class="fas fa-play"></i> Start</button>
           </div>
+          <button onclick="resetQuickRound()" class="icon-delete"><i class="fas fa-trash"></i> Quick Round zurücksetzen</button>
         </div>
       </div>
     </main>
   </div>
 
-  <div id="settingsView">
+  <div id="debateView" style="display: none;">
     <main class="second-layout">
       <div class="section">
-        <div class="header-section">
-          <h2>Einstellungen</h2>
-        </div>
-        <div>
-          <label>Seitentitel: <input id="settingsTitle" type="text" placeholder="z. B. BuVo-Wahl 2025"></label><br>
-          <label>Standard-Redezeit (min): <input id="settingsDefaultTime" type="number" min="1" placeholder="10"></label><br>
-          <label>Schnelldurchlauf-Zeit (sek): <input id="settingsQuickTime" type="number" min="10" placeholder="60"></label><br>
-          <button onclick="saveSettings()">💾 Einstellungen speichern</button>
-        </div>
+        <h2 id="debateTopic" style="font-size: 2rem; margin-bottom: 20px;"></h2>
+        <ul id="debateTimerList"></ul>
+        <button onclick="clearDebateTimers()" class="icon-delete"><i class="fas fa-trash"></i> Diskussionstimer löschen</button>
       </div>
     </main>
+  </div>
+
+  <div>
+    <p style="color: var(--volt-light-purple); margin-top: 25px; text-align: center; max-width: 100%;">Wahlkommission zum Bundesparteitag in Düsseldorf 2025</p>
+  </div>
+
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <h3><i class="fas fa-cog"></i> Einstellungen</h3>
+      <label>Titel der Seite:<br>
+        <input id="settingsTitle" type="text" placeholder="z. B. BuVo-Wahl 2025">
+      </label><br>
+      <label>Standard-Redezeit (min):<br>
+        <input id="settingsDefaultTime" type="number" min="1" placeholder="10">
+      </label><br>
+      <label>Schnelldurchlauf-Zeit (sek):<br>
+        <input id="settingsQuickTime" type="number" min="10" placeholder="60">
+      </label><br>
+      <label>Debattenzeit pro Person (min):<br>
+        <input id="settingsDebateTime" type="number" min="1" placeholder="10">
+      </label><br>
+      <label>Standard-Debattenthema:<br>
+        <input id="settingsDebateTopic" type="text" placeholder="z. B. Digitalisierung">
+      </label><br><br>
+      <button onclick="resetSettings()" class="icon-delete"><i class="fas fa-trash"></i> Auf Werkseinstellungen zurücksetzen</button><br>
+      <button onclick="saveSettings()"><i class="fas fa-save"></i> Speichern</button>
+      <button onclick="closeSettings()"><i class="fas fa-times"></i> Schließen</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
-
-  <div>
-    <p style="color: var(--volt-light-purple); margin-top: 25px; text-align: center; max-width: 100%;">Wahlkommission zum Bundesparteitag in Düssseldorf 2025</p>
-  </div>
 </body>
 
 </html>

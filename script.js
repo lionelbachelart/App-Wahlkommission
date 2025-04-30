@@ -1,33 +1,47 @@
+function toggleSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  section.classList.toggle("active");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadFromSession();
+  showMainView();
+  const title = sessionStorage.getItem('customTitle');
+  const defaultTime = sessionStorage.getItem('defaultTime');
+  const quickTime = sessionStorage.getItem('quickTime');
+
+  if (title) document.querySelector("header h1").textContent = title;
+  if (defaultTime) document.getElementById("settingsDefaultTime").value = defaultTime;
+  if (quickTime) document.getElementById("settingsQuickTime").value = quickTime;
+
   document.getElementById("timerDuration").addEventListener("keydown", function (e) {
     if (e.key === "Enter") {
       createTimer();
     }
   });
-  const title = sessionStorage.getItem('customTitle');
-  if (title) document.querySelector("header h1").textContent = title;
 });
-
 
 let questions = [];
 let names = [];
 let currentQuestionIndex = -1;
 let selectedNames = new Set(names);
+let quickNames = [];
+let quickIndex = -1;
+let quickInterval = null;
+let quickRemaining = 60;
+let quickCircle = null;
+let quickCircumference = 0;
+const debateTimers = {};
 
 function addQuestions() {
-  updateSessionStorage(); // ← DAS HAT GEFELHT
-  setTimeout(() => {
-    const input = document.getElementById("questionInput").value;
-    const newQuestions = input.split("\n").map(q => q.trim()).filter(q => q.length > 0);
-    questions = questions.concat(newQuestions);
-    updateSessionStorage(); // ← DAS HAT GEFELHT
-    displayQuestions();
-    document.getElementById('questionInputSection').style.display = 'none';
-    document.getElementById('questionInput').value = '';
-  }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
+  const input = document.getElementById("questionInput").value;
+  const newQuestions = input.split("\n").map(q => q.trim()).filter(q => q.length > 0);
+  questions = questions.concat(newQuestions);
+  updateSessionStorage();
+  displayQuestions();
+  document.getElementById('questionInputSection').classList.remove('active');
+  document.getElementById('questionInput').value = '';
 }
-
 
 function addNames() {
   setTimeout(() => {
@@ -36,11 +50,11 @@ function addNames() {
     names = names.concat(newNames);
     updateSessionStorage();
     displayNames();
-    selectedNames = new Set(names); // richtig initialisieren
-    document.getElementById('nameInputSection').style.display = 'none';
+    selectedNames = new Set(names);
+    document.getElementById('nameInputSection').classList.remove('active');
     document.getElementById('nameInput').value = '';
     newNames.forEach(name => createTimer(name, 10));
-  }, 500); // Simuliert eine Verzögerung, um die Ladeanzeige zu sehen
+  }, 500);
 }
 
 function displayQuestions() {
@@ -52,8 +66,8 @@ function displayQuestions() {
     text.textContent = question;
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.innerHTML = '✖'; // kleines "x"
-    deleteBtn.className = 'inline-delete';
+    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteBtn.className = 'icon-delete';
     deleteBtn.onclick = () => {
       questions.splice(index, 1);
       updateSessionStorage();
@@ -67,8 +81,6 @@ function displayQuestions() {
   });
 }
 
-
-
 function displayNames() {
   const nameList = document.getElementById("nameList");
   nameList.innerHTML = '';
@@ -78,8 +90,8 @@ function displayNames() {
     text.textContent = name;
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.innerHTML = '✖';
-    deleteBtn.className = 'inline-delete';
+    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteBtn.className = 'icon-delete';
     deleteBtn.onclick = () => {
       names.splice(index, 1);
       selectedNames.delete(name);
@@ -96,7 +108,6 @@ function displayNames() {
     nameList.appendChild(li);
   });
 }
-
 
 function toggleNameSelection(li, name) {
   if (li.classList.contains('not-selected')) {
@@ -131,7 +142,6 @@ function animateHighlight(listId, arr, callback) {
   }, 100);
 }
 
-
 function spinQuestion() {
   if (questions.length === 0) return alert("Keine Fragen geladen.");
   animateHighlight('questionList', questions, index => {
@@ -142,7 +152,6 @@ function spinQuestion() {
     document.getElementById("spinQuestionButton").style.display = 'none';
   });
 }
-
 
 function nextQuestion() {
   if (currentQuestionIndex !== -1) {
@@ -167,7 +176,6 @@ function spinName() {
   animateHighlight('nameList', selectedNamesArray, index => {
     const result = selectedNamesArray[index];
     document.getElementById("nameResult").textContent = result;
-
     document.querySelectorAll('#nameList li.selected').forEach(li => {
       if (li.textContent === result) {
         li.classList.remove('selected');
@@ -176,22 +184,6 @@ function spinName() {
     });
     selectedNames.delete(result);
   });
-}
-
-
-function toggleTimerSection() {
-  const timerSection = document.getElementById('timerInputSection');
-  timerSection.style.display = timerSection.style.display === "none" ? "block" : "none";
-}
-
-function toggleNameSection() {
-  const nameSection = document.getElementById('nameInputSection');
-  nameSection.style.display = nameSection.style.display === "none" ? "block" : "none";
-}
-
-function toggleQuestionSection() {
-  const questionSection = document.getElementById('questionInputSection');
-  questionSection.style.display = questionSection.style.display === "none" ? "block" : "none";
 }
 
 function createTimer(nameArg = null, minutesArg = null) {
@@ -218,9 +210,10 @@ function createTimer(nameArg = null, minutesArg = null) {
 
   label.textContent = `${name}: `;
   timeDisplay.textContent = formatTime(remaining);
-  statusDisplay.textContent = "⏸️ Pausiert";
-  toggleBtn.textContent = "▶️ Start";
-  deleteBtn.textContent = "❌";
+  statusDisplay.innerHTML = '<i class="fas fa-pause-circle"></i> Pausiert';
+  toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+  deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+  deleteBtn.className = 'icon-delete';
 
   li.appendChild(svg);
   li.appendChild(label);
@@ -247,133 +240,165 @@ function createTimer(nameArg = null, minutesArg = null) {
     circle.setAttribute("stroke-dashoffset", progress);
   }
 
-  function tick() {
+  function animateTimer(timestamp) {
+    if (!li.startTime) li.startTime = timestamp;
+    const elapsed = (timestamp - li.startTime) / 1000;
+    const left = Math.max(duration - elapsed, 0);
+    remaining = Math.ceil(left);
+
+    updateDisplay();
+
     if (remaining > 0) {
-      remaining--;
-      updateDisplay();
-      if (remaining <= 0) {
-        clearInterval(intervalId);
-        active = false;
-        statusDisplay.textContent = "✅ Fertig!";
-        toggleBtn.disabled = true;
-        circle.setAttribute("stroke", "#f44336");
-      }
+      intervalId = requestAnimationFrame(animateTimer);
+    } else {
+      active = false;
+      toggleBtn.disabled = true;
+      statusDisplay.innerHTML = '<i class="fas fa-check-circle"></i> Fertig!';
+      circle.setAttribute("stroke", "#f44336");
     }
   }
 
   toggleBtn.onclick = () => {
     if (active) {
-      clearInterval(intervalId);
+      cancelAnimationFrame(intervalId);
       active = false;
-      statusDisplay.textContent = "⏸️ Pausiert";
-      toggleBtn.textContent = "▶️ Start";
+      statusDisplay.innerHTML = '<i class="fas fa-pause-circle"></i> Pausiert';
+      toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
     } else {
-      intervalId = setInterval(tick, 1000);
+      li.startTime = null;
+      intervalId = requestAnimationFrame(animateTimer);
       active = true;
-      statusDisplay.textContent = "⏱️ Läuft";
-      toggleBtn.textContent = "⏸️ Pause";
+      statusDisplay.innerHTML = '<i class="fas fa-play-circle"></i> Läuft';
+      toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
     }
   };
 
   deleteBtn.onclick = () => {
-    clearInterval(intervalId);
+    cancelAnimationFrame(intervalId);
     li.remove();
   };
 
   updateDisplay();
 }
 
-function createTimerSVG(radius = 10) {
-  const circumference = 2 * Math.PI * radius;
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("width", radius * 2 + 10);
-  svg.setAttribute("height", radius * 2 + 10);
+function createTimerSVG() {
+  const svgNS = "http://www.w3.org/2000/svg";
 
-  const circleBg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  circleBg.setAttribute("cx", radius + 5);
-  circleBg.setAttribute("cy", radius + 5);
+  const inQuickRound = document.getElementById("quickRoundView")?.style.display !== "none";
+  const inDebateView = document.getElementById("debateView")?.style.display !== "none";
+
+  let radius = 20;
+  let strokeWidth = 7.5;
+
+  if (inQuickRound) {
+    radius = 40;
+    strokeWidth = 15;
+  } else if (inDebateView) {
+    radius = 40;
+    strokeWidth = 15;
+  }
+
+  const size = radius * 2 + strokeWidth + 4;
+  const circumference = 2 * Math.PI * radius;
+
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("width", size);
+  svg.setAttribute("height", size);
+
+  const circleBg = document.createElementNS(svgNS, "circle");
+  circleBg.setAttribute("cx", size / 2);
+  circleBg.setAttribute("cy", size / 2);
   circleBg.setAttribute("r", radius);
   circleBg.setAttribute("fill", "none");
+  circleBg.setAttribute("stroke", "#e0d6f0");
+  circleBg.setAttribute("stroke-width", strokeWidth);
 
-  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  circle.setAttribute("cx", radius + 5);
-  circle.setAttribute("cy", radius + 5);
+  const circle = document.createElementNS(svgNS, "circle");
+  circle.setAttribute("cx", size / 2);
+  circle.setAttribute("cy", size / 2);
   circle.setAttribute("r", radius);
-
-  const inQuickRound = document.getElementById("quickRoundView").style.display === "block";
-  circleBg.setAttribute("stroke", inQuickRound ? "#50237933" : "#ffffff33");
-  circle.setAttribute("stroke", inQuickRound ? "#502379" : "#ffffff");
-  circleBg.setAttribute("stroke-width", inQuickRound ? "10" : "5");
-  circle.setAttribute("stroke-width", inQuickRound ? "10" : "5");
   circle.setAttribute("fill", "none");
+  circle.setAttribute("stroke", "#502379");
+  circle.setAttribute("stroke-width", strokeWidth);
   circle.setAttribute("stroke-dasharray", circumference);
   circle.setAttribute("stroke-dashoffset", circumference);
-  circle.classList.add("progress-circle");
+  circle.setAttribute("stroke-linecap", "round");
+  circle.setAttribute("transform", `rotate(-90 ${size / 2} ${size / 2})`);
+  circle.style.transition = "stroke-dashoffset 0.5s ease-out";
 
   svg.appendChild(circleBg);
   svg.appendChild(circle);
+
   return { svg, circle, circumference };
 }
+
+
 
 function showMainView() {
   document.getElementById('mainView').style.display = 'block';
   document.getElementById('quickRoundView').style.display = 'none';
-  document.getElementById('settingsView').style.display = 'none';
-}
-
-function showSettings() {
-  document.getElementById('mainView').style.display = 'none';
-  document.getElementById('quickRoundView').style.display = 'none';
-  document.getElementById('settingsView').style.display = 'block';
-}
-
-let quickNames = [];
-let quickIndex = -1;
-let quickInterval = null;
-let quickRemaining = 60;
-let quickCircle = null;
-let quickCircumference = null;
-
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
+  document.getElementById('debateView').style.display = 'none';
+  setActiveNav("Fragen & Antworten");
+  cancelAllTimers();
 }
 
 function showQuickRound() {
   document.getElementById('mainView').style.display = 'none';
   document.getElementById('quickRoundView').style.display = 'block';
-  document.getElementById('settingsView').style.display = 'none';
+  document.getElementById('debateView').style.display = 'none';
+  setActiveNav("Schnelle Runde");
+
   quickNames = shuffle([...names]);
   quickIndex = -1;
-  document.getElementById('quickRoundName').textContent = '';
-  document.getElementById('quickTimerCircle').innerHTML = '';
-  document.getElementById('quickSecondsDisplay').textContent = '';
-}
 
-function startQuickRound() {
-  quickRemaining = parseInt(sessionStorage.getItem('quickTime')) || 60;
-  if (quickIndex === -1 || quickIndex >= quickNames.length) {
-    alert("Bitte zuerst auf 'Nächster' klicken.");
-    return;
-  }
-  quickRemaining = 60;
+  const nameBox = document.getElementById('quickRoundName');
+  nameBox.textContent = "Noch kein Name gezogen";
+  nameBox.classList.add("result-box");
+
   const { svg, circle, circumference } = createTimerSVG(50);
   quickCircle = circle;
   quickCircumference = circumference;
 
-  document.getElementById('quickTimerCircle').innerHTML = '';
-  document.getElementById('quickTimerCircle').appendChild(svg);
-  updateQuickDisplay();
+  const timerHolder = document.getElementById('quickTimerCircle');
+  timerHolder.innerHTML = '';
+  timerHolder.appendChild(svg);
 
-  clearInterval(quickInterval);
-  quickInterval = setInterval(() => {
-    quickRemaining--;
-    updateQuickDisplay();
+  document.getElementById('quickSecondsDisplay').textContent = "";
+}
 
-    if (quickRemaining <= 0) {
-      clearInterval(quickInterval);
-      quickCircle.setAttribute("stroke", "#f44336"); // rot bei Ende
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function startQuickRound() {
+  if (quickIndex < 0 || quickIndex >= quickNames.length) return;
+
+  const duration = parseInt(sessionStorage.getItem("quickTime")) || 60;
+  let startTime = null;
+
+  function animateQuickTimer(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = (timestamp - startTime) / 1000;
+    const remaining = Math.max(duration - elapsed, 0);
+
+    const progress = (remaining / duration) * quickCircumference;
+    quickCircle.setAttribute("stroke-dashoffset", progress);
+    document.getElementById('quickSecondsDisplay').textContent = Math.ceil(remaining);
+
+    if (remaining > 0) {
+      quickInterval = requestAnimationFrame(animateQuickTimer);
+    } else {
+      quickCircle.setAttribute("stroke", "#f44336");
+      document.getElementById('quickSecondsDisplay').textContent = "0";
     }
-  }, 1000);
+  }
+
+  if (quickInterval) {
+    cancelAnimationFrame(quickInterval);
+  }
+
+  quickInterval = requestAnimationFrame(animateQuickTimer);
 }
 
 function updateQuickDisplay() {
@@ -392,9 +417,58 @@ function nextQuick() {
   }
 
   quickIndex++;
-  document.getElementById('quickRoundName').textContent = quickNames[quickIndex];
-  document.getElementById('quickTimerCircle').innerHTML = '';
+  const name = quickNames[quickIndex];
+  document.getElementById('quickRoundName').textContent = name;
+  document.getElementById('quickRoundName').classList.add("result-box");
+
+  quickRemaining = parseInt(sessionStorage.getItem('quickTime')) || 60;
+
+  if (quickCircle && quickCircumference) {
+    quickCircle.setAttribute("stroke-dashoffset", quickCircumference);
+  }
+
   document.getElementById('quickSecondsDisplay').textContent = '';
+}
+
+function showSettings() {
+  const modal = document.getElementById("settingsModal");
+  modal.classList.add("show");
+  document.getElementById("settingsTitle").value = sessionStorage.getItem("customTitle") || '';
+  document.getElementById("settingsDefaultTime").value = sessionStorage.getItem("defaultTime") || 10;
+  document.getElementById("settingsQuickTime").value = sessionStorage.getItem("quickTime") || 60;
+  document.getElementById("settingsDebateTime").value = sessionStorage.getItem("debateTime") || 10;
+  document.getElementById("settingsDebateTopic").value = sessionStorage.getItem("debateTopic") || '';
+}
+
+function closeSettings() {
+  document.getElementById("settingsModal").style.display = "none";
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById("settingsModal");
+  if (event.target === modal) {
+    modal.classList.remove("show");
+  }
+}
+
+function saveSettings() {
+  const title = document.getElementById("settingsTitle").value.trim();
+  const defaultTime = parseInt(document.getElementById("settingsDefaultTime").value, 10);
+  const quickTime = parseInt(document.getElementById("settingsQuickTime").value, 10);
+  const debateTime = parseInt(document.getElementById("settingsDebateTime").value, 10);
+  const debateTopic = document.getElementById("settingsDebateTopic").value.trim();
+
+  if (title) {
+    sessionStorage.setItem('customTitle', title);
+    document.querySelector("header h1").textContent = title;
+  }
+  if (!isNaN(defaultTime)) sessionStorage.setItem('defaultTime', defaultTime);
+  if (!isNaN(quickTime)) sessionStorage.setItem('quickTime', quickTime);
+  if (!isNaN(debateTime)) sessionStorage.setItem('debateTime', debateTime);
+  if (debateTopic) sessionStorage.setItem('debateTopic', debateTopic);
+
+  closeSettings();
+  alert("Einstellungen gespeichert!");
 }
 
 function updateSessionStorage() {
@@ -409,14 +483,17 @@ function loadFromSession() {
   if (storedQuestions) questions = storedQuestions;
   if (storedNames) {
     names = storedNames;
-    storedNames.forEach(name => createTimer(name, 10));
+    storedNames.forEach(name => {
+      if (!document.querySelector(`#timerList li span`)?.textContent.includes(name)) {
+        createTimer(name, 10);
+      }
+    });
     selectedNames = new Set(names);
   }
 
   displayQuestions();
   displayNames();
 }
-
 
 function clearQuestions() {
   if (confirm("Alle Fragen wirklich löschen?")) {
@@ -435,35 +512,197 @@ function clearNames() {
   }
 }
 
-function saveSettings() {
-  const title = document.getElementById("settingsTitle").value.trim();
-  const defaultTime = parseInt(document.getElementById("settingsDefaultTime").value, 10);
-  const quickTime = parseInt(document.getElementById("settingsQuickTime").value, 10);
-
-  if (title) {
-    sessionStorage.setItem('customTitle', title);
-    document.querySelector("header h1").textContent = title;
-  }
-  if (!isNaN(defaultTime)) sessionStorage.setItem('defaultTime', defaultTime);
-  if (!isNaN(quickTime)) sessionStorage.setItem('quickTime', quickTime);
-
-  alert("Einstellungen gespeichert!");
+function showDebateView(topic = "Diskussionsthema") {
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('quickRoundView').style.display = 'none';
+  const settingsView = document.getElementById('settingsView');
+  if (settingsView) settingsView.style.display = 'none';
+  document.getElementById('debateView').style.display = 'block';
+  const savedTopic = sessionStorage.getItem('debateTopic') || topic;
+  document.getElementById('debateTopic').textContent = savedTopic;
+  generateDebateTimers();
+  setActiveNav("Diskussion");
 }
 
+function generateDebateTimers() {
+  const list = document.getElementById("debateTimerList");
+  list.innerHTML = '';
+  const debateTime = (parseInt(sessionStorage.getItem('debateTime')) || 10) * 60;
 
-// Beim Laden:
-document.addEventListener("DOMContentLoaded", () => {
-  const title = sessionStorage.getItem('customTitle');
-  const defaultTime = sessionStorage.getItem('defaultTime');
-  const quickTime = sessionStorage.getItem('quickTime');
+  names.forEach((name, index) => {
+    const id = `debate-${index}`;
+    const card = document.createElement("div");
+    card.className = "debate-card";
 
-  if (title) document.querySelector("header h1").textContent = title;
-  if (defaultTime) document.getElementById("settingsDefaultTime").value = defaultTime;
-  if (quickTime) document.getElementById("settingsQuickTime").value = quickTime;
+    const title = document.createElement("h3");
+    title.textContent = name;
+
+    const timeDisplay = document.createElement("div");
+    timeDisplay.id = `${id}-time`;
+    timeDisplay.textContent = formatTime(debateTime);
+    timeDisplay.className = "debate-time";
+
+    const btn = document.createElement("button");
+    btn.innerHTML = '<i class="fas fa-play"></i>';
+    btn.className = 'icon-delete';
+    btn.title = `Taste ${index + 1}`;
+
+    const { svg, circle, circumference } = createTimerSVG();
+    const svgHolder = document.createElement("div");
+    svgHolder.className = "circle-holder";
+    svgHolder.appendChild(svg);
+
+    card.appendChild(title);
+    card.appendChild(svgHolder);
+    card.appendChild(timeDisplay);
+    card.appendChild(btn);
+    list.appendChild(card);
+
+    let startTime = null;
+    let interval = null;
+    let active = false;
+
+    function animateDebateTimer(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = (timestamp - startTime) / 1000;
+      const remaining = Math.max(debateTime - elapsed, 0);
+
+      const progress = (remaining / debateTime) * circumference;
+      circle.setAttribute("stroke-dashoffset", progress);
+      timeDisplay.textContent = formatTime(remaining);
+
+      if (remaining > 0) {
+        interval = requestAnimationFrame(animateDebateTimer);
+      } else {
+        circle.setAttribute("stroke", "#f44336");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i>';
+      }
+    }
+
+    btn.onclick = () => {
+      if (active) {
+        cancelAnimationFrame(interval);
+        active = false;
+        btn.innerHTML = '<i class="fas fa-play"></i>';
+      } else {
+        startTime = null;
+        interval = requestAnimationFrame(animateDebateTimer);
+        active = true;
+        btn.innerHTML = '<i class="fas fa-pause"></i>';
+      }
+    };
+  });
+}
+
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = Math.floor(secs % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+document.addEventListener("keydown", (e) => {
+  const number = parseInt(e.key);
+  if (!isNaN(number) && number >= 1 && number <= 9) {
+    const id = `debate-timer-${number - 1}`;
+    if (debateTimers[id]) debateTimers[id]();
+  }
 });
 
-// Anpassung im createTimer():
-const defaultMinutes = parseInt(sessionStorage.getItem('defaultTime')) || 10;
-// und beim Schnelldurchlauf: 
-quickRemaining = parseInt(sessionStorage.getItem('quickTime')) || 60;
+// Set active state on navigation buttons
+function setActiveNav(label) {
+  document.querySelectorAll('.main-nav button').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.getAttribute('aria-label') === label) {
+      btn.classList.add('active');
+    }
+  });
+}
 
+// Hook into existing view-switching functions
+const originalShowMainView = showMainView;
+showMainView = function() {
+  originalShowMainView();
+  setActiveNav("Fragen & Antworten");
+};
+
+const originalShowQuickRound = showQuickRound;
+showQuickRound = function() {
+  originalShowQuickRound();
+  setActiveNav("Schnelle Runde");
+};
+
+const originalShowDebateView = showDebateView;
+showDebateView = function(topic) {
+  originalShowDebateView(topic);
+  setActiveNav("Diskussion");
+};
+
+function clearAllTimers() {
+  if (confirm("Alle Timer wirklich löschen?")) {
+    const list = document.getElementById("timerList");
+    list.innerHTML = '';
+  }
+}
+
+function resetQuickRound() {
+  quickNames = [];
+  quickIndex = -1;
+  cancelAnimationFrame(quickInterval);
+  quickInterval = null;
+  quickCircle?.setAttribute("stroke-dashoffset", quickCircumference);
+  document.getElementById("quickRoundName").textContent = "Noch kein Name gezogen";
+  document.getElementById("quickSecondsDisplay").textContent = "—";
+}
+
+function clearDebateTimers() {
+  const list = document.getElementById("debateTimerList");
+  list.innerHTML = '';
+}
+
+function resetSettings() {
+  if (confirm("Alle Einstellungen auf Werkseinstellungen zurücksetzen?")) {
+    sessionStorage.clear();
+    location.reload();
+  }
+}
+
+document.addEventListener("keydown", (e) => {
+  const key = parseInt(e.key);
+  if (isNaN(key) || key < 1 || key > 9) return;
+
+  // Fragen-Tab
+  if (document.getElementById("mainView").style.display === "block") {
+    const timers = document.querySelectorAll("#timerList li");
+    const index = key - 1;
+    if (timers[index]) {
+      timers[index].querySelector("button")?.click();
+    }
+  }
+
+  // Debatten-Tab
+  if (document.getElementById("debateView").style.display === "block") {
+    const cards = document.querySelectorAll("#debateTimerList .debate-card");
+    const index = key - 1;
+    if (cards[index]) {
+      cards[index].querySelector("button")?.click();
+    }
+  }
+});
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+  const isDark = document.body.classList.contains("dark-mode");
+  sessionStorage.setItem("darkMode", isDark ? "1" : "0");
+  document.getElementById("darkModeBtn").innerHTML = isDark
+    ? '<i class="fas fa-sun"></i>'
+    : '<i class="fas fa-moon"></i>';
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (sessionStorage.getItem("darkMode") === "1") {
+    document.body.classList.add("dark-mode");
+    const btn = document.getElementById("darkModeBtn");
+    if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
+  }
+});
