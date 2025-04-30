@@ -689,20 +689,3 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
-
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-  const isDark = document.body.classList.contains("dark-mode");
-  sessionStorage.setItem("darkMode", isDark ? "1" : "0");
-  document.getElementById("darkModeBtn").innerHTML = isDark
-    ? '<i class="fas fa-sun"></i>'
-    : '<i class="fas fa-moon"></i>';
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  if (sessionStorage.getItem("darkMode") === "1") {
-    document.body.classList.add("dark-mode");
-    const btn = document.getElementById("darkModeBtn");
-    if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
-  }
-});

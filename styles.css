@@ -245,7 +245,7 @@ li.drawn {
   background: none;
   border: none;
   padding: 0;
-  color: var(--volt-light-purple);
+  color: var(--volt-white);
   font-size: 1rem;
   cursor: pointer;
   display: inline-flex;
@@ -261,7 +261,7 @@ li.drawn {
 .icon-delete:hover {
   transform: none !important;
   background: none !important;
-  color: var(--volt-light-purple) !important;
+  color: var(--volt-white) !important;
 }
 
 
@@ -397,79 +397,4 @@ li.drawn {
 .debate-card button i {
   color: white;
   font-size: 1rem;
-}
-
-/* Dark Mode Unterstützung */
-:root {
-  --volt-bg: #f5f5fa;
-  --volt-white: #ffffff;
-  --volt-text: #1e1e1e;
-  --volt-light-purple: #8661c1;
-}
-
-body.dark-mode {
-  --volt-bg: #1e1e2e;
-  --volt-white: #1a1a1a;
-  --volt-text: #eeeeee;
-  --volt-light-purple: #a28be0;
-
-  background-color: var(--volt-bg);
-  color: var(--volt-text);
-}
-
-.dark-mode .section,
-.dark-mode .debate-card {
-  background-color: var(--volt-white);
-  color: var(--volt-text);
-  box-shadow: none;
-}
-
-.dark-mode .main-nav {
-  background-color: var(--volt-white);
-  border-color: #444;
-}
-
-.dark-mode button,
-.dark-mode .icon-delete i {
-  color: var(--volt-light-purple);
-}
-
-.dark-mode input,
-.dark-mode textarea {
-  background-color: #2b2b3a;
-  color: #eee;
-  border-color: #555;
-}
-
-.dark-mode .result-box,
-.dark-mode .modal-content {
-  background-color: #2a223a;
-  color: var(--volt-text);
-  border-left-color: var(--volt-light-purple);
-}
-
-.dark-mode ul li,
-.dark-mode #questionList li,
-.dark-mode #nameList li,
-.dark-mode .list-section {
-  background-color: #2c2c3a;
-  border-color: #444;
-  color: var(--volt-text);
-
-}
-
-.dark-mode ul li.selected,
-.dark-mode #questionList li.selected,
-.dark-mode #nameList li.selected,
-.dark-mode .list-selection li.selected {
-  background-color: var(--volt-light-purple);
-  color: #fff;
-}
-
-.dark-mode ul li.drawn,
-.dark-mode #questionList li.drawn,
-.dark-mode #nameList li.drawn,
-.dark-mode .list-selection li.drawn {
-  background-color: #444;
-  color: #ccc;
 }
