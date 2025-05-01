@@ -265,8 +265,10 @@ function createTimer(nameArg = null, minutesArg = null) {
       statusDisplay.innerHTML = '<i class="fas fa-pause-circle"></i> Pausiert';
       toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
     } else {
-      li.startTime = null;
-      intervalId = requestAnimationFrame(animateTimer);
+      startTime = null;
+      remainingTime = parseFloat(timeDisplay.textContent.split(':')[0]) * 60 +
+                      parseFloat(timeDisplay.textContent.split(':')[1]);
+      interval = requestAnimationFrame(animateDebateTimer);;
       active = true;
       statusDisplay.innerHTML = '<i class="fas fa-play-circle"></i> Läuft';
       toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
@@ -376,6 +378,7 @@ function startQuickRound() {
 
   const duration = parseInt(sessionStorage.getItem("quickTime")) || 60;
   let startTime = null;
+  let remainingTime = debateTime;
 
   function animateQuickTimer(timestamp) {
     if (!startTime) startTime = timestamp;
@@ -561,11 +564,12 @@ function generateDebateTimers() {
     let startTime = null;
     let interval = null;
     let active = false;
+    let remainingTime = debateTime;
 
     function animateDebateTimer(timestamp) {
       if (!startTime) startTime = timestamp;
       const elapsed = (timestamp - startTime) / 1000;
-      const remaining = Math.max(debateTime - elapsed, 0);
+      const remaining = Math.max(remainingTime - elapsed, 0);
 
       const progress = (remaining / debateTime) * circumference;
       circle.setAttribute("stroke-dashoffset", progress);
@@ -584,6 +588,8 @@ function generateDebateTimers() {
       if (active) {
         cancelAnimationFrame(interval);
         active = false;
+        const [min, sec] = timeDisplay.textContent.split(":").map(Number);
+        remainingTime = min * 60 + sec;
         btn.innerHTML = '<i class="fas fa-play"></i>';
       } else {
         startTime = null;
